@@ -29,10 +29,10 @@ public class SkillController {
                                          Errors errors, Model model) {
 
         if (errors.hasErrors()) {
-            skillRepository.save(newSkill);
             return "skills/add";
         }
-        return "redirect:";
+        skillRepository.save(newSkill);
+        return "redirect:../";
     }
 
     @GetMapping("view/{skillId}")

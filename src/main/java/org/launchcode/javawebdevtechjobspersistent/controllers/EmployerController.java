@@ -29,10 +29,10 @@ public class EmployerController {
                                     Errors errors, Model model) {
 
         if (errors.hasErrors()) {
-            employerRepository.save(newEmployer);
             return "employers/add";
         }
-        return "redirect:";
+        employerRepository.save(newEmployer);
+        return "redirect:../";
     }
 
     @GetMapping("view/{employerId}")
