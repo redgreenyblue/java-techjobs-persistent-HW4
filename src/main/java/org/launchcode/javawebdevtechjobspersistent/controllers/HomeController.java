@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +35,9 @@ public class HomeController {
     @RequestMapping("")
     public String index(Model model) {
 
+        model.addAttribute("title", "My Jobs");
         model.addAttribute("jobs", jobRepository.findAll());
+        model.addAttribute("skills", skillRepository.findAll());
 
         return "index";
     }
@@ -54,25 +54,24 @@ public class HomeController {
     }
 
     @PostMapping("add")
-    @NotNull
     public String processAddJobForm(@ModelAttribute @Valid Job newJob,
-        Errors errors, Model model, @RequestParam int employerId, @RequestParam List<Integer> skills) {
+        Errors errors, Model model, @RequestParam int employerId, @RequestParam(required = false) List<Integer> skills) {
 
-        if (errors.hasErrors()) {
+        if (errors.hasErrors() || skills == null) {
+            model.addAttribute("title", "Add Job");
+            model.addAttribute("employers", employerRepository.findAll());
+            model.addAttribute("skills", skillRepository.findAll());
 
             return "add";
         }
 
-            Optional optEmployer = employerRepository.findById(employerId);
-            if (optEmployer.isPresent()) {
-                Employer employer = (Employer) optEmployer.get();
-                newJob.setEmployer(employer);
-            }
+        Optional<Employer> optEmployer = employerRepository.findById(employerId);
+        Employer employer = optEmployer.get();
+        newJob.setEmployer(employer);
+        List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
+        newJob.setSkills(skillObjs);
 
-            List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
-            newJob.setSkills(skillObjs);
-
-            jobRepository.save(newJob);
+        jobRepository.save(newJob);
 
         return "redirect:";
     }
